@@ -1,6 +1,12 @@
 const { CohereClient } = require("cohere-ai");
 const dotenv = require("dotenv");
 
+const express = require("express");
+
+const app = express();
+
+let cohereResponse = "";
+
 dotenv.config();
 const cohere = new CohereClient({
   token: process.env.COHERE_KEY,
@@ -16,7 +22,15 @@ const cohere = new CohereClient({
 
   for await (const message of chatStream) {
     if (message.eventType === "text-generation") {
-      console.log(message);
+      cohereResponse = cohereResponse + message;
     }
   }
 })();
+
+app.get("/", (req, res, next) => {
+  res.send(cohereResponse);
+});
+
+app.listen(3001, () => {
+  console.log(`Example app listening on port 3001`);
+});
